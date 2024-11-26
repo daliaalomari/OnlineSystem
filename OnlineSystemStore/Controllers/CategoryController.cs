@@ -13,6 +13,7 @@ namespace OnlineSystemStore.Controllers
         {
             _categoryService = categoryService;
         }
+
         [HttpGet("Max")]
         public IActionResult GetCategorysMaxNumber()
         {
@@ -28,6 +29,7 @@ namespace OnlineSystemStore.Controllers
             return Ok(CategorysData);
         }
 
+        [HttpPost("GetDataTable")]
         public async Task<IActionResult> GetCategorysDataTalbe(string Search, string CoulmnName, bool isAsending, int skip, int take)
         {
             var CategorysData = await _categoryService.GetAllCategoryAsync();

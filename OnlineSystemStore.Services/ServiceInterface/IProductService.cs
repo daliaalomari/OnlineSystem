@@ -7,6 +7,8 @@ namespace OnlineSystemStore.Services.ServiceInterface
     public interface IProductService
     {
         int Max();
+
+        Task<IEnumerable<ProductDto>> GetProductWithCategoryNameAsync();
         Task<ResponseDto<IEnumerable<ProductDto>>> GetAllProductAsync();
         Task<ResponseDto<ProductDto>> GetProductByIdAsync(int id);
         Task<ResponseDto<ProductDto>> AddProductAsync(ProductDto model);
