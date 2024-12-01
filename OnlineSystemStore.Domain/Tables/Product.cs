@@ -11,6 +11,6 @@ namespace OnlineSystemStore.Domain.Tables
         public required string ProductName { get; set; }
         public double Price { get; set; }
         public string ProductDescription { get; set; } = string.Empty;
-        public int CategoryRef { get; set; }
+      
     }
 }
