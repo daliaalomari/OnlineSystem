@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Logging;
 using OnlineSystemStore.Domain.DTOs;
 using OnlineSystemStore.Domain.HandelRequest;
 using OnlineSystemStore.Domain.InterfaceRepository;
@@ -13,28 +14,37 @@ namespace OnlineSystemStore.Services.ServiceImplementation
     {
         private readonly IMainRepository<Category> _repository;
         private readonly IMapper _mapp;
+        private readonly ILogger<CategoryService> _logger;
 
-        public CategoryService(IMainRepository<Category> repository, IMapper mapp)
+        public CategoryService(IMainRepository<Category> repository, IMapper mapp, ILogger<CategoryService> logger)
         {
             _repository = repository;
             _mapp = mapp;
+            _logger = logger;
         }
 
         public int Max() => _repository.Max(x => x.CategoryId);
 
         public async Task<ResponseDto<IEnumerable<CategoryDto>>> GetAllCategoryAsync()
         {
-            var stopwatch = new Stopwatch();
+            try
+            {
+                var stopwatch = new Stopwatch();
 
-            stopwatch.Start();
+                stopwatch.Start();
 
-            var CategoryData = await _repository.GetAllAsync();
+                var CategoryData = await _repository.GetAllAsync();
 
-            var CategoryDto = _mapp.Map<IEnumerable<CategoryDto>>(CategoryData);
+                var CategoryDto = _mapp.Map<IEnumerable<CategoryDto>>(CategoryData);
 
-            stopwatch.Stop();
+                stopwatch.Stop();
 
-            return ResponseDto<IEnumerable<CategoryDto>>.SuccessResponse(data: CategoryDto, executionTimeInMilliseconds: stopwatch.ElapsedMilliseconds);
+                return ResponseDto<IEnumerable<CategoryDto>>.SuccessResponse(data: CategoryDto, executionTimeInMilliseconds: stopwatch.ElapsedMilliseconds);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         public async Task<ResponseDto<CategoryDto>> GetCategoryByIdAsync(int id)

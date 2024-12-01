@@ -13,5 +13,6 @@ namespace OnlineSystemStore.Domain.DTOs
         public double Price { get; set; }
         public string ProductDescription { get; set; } = string.Empty;
         public int CategoryRef { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
     }
 }

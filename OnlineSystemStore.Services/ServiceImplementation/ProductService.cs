@@ -1,33 +1,52 @@
 ﻿using AutoMapper;
-using Microsoft.Extensions.Logging;
 using OnlineSystemStore.Domain.DTOs;
 using OnlineSystemStore.Domain.HandelRequest;
 using OnlineSystemStore.Domain.InterfaceRepository;
 using OnlineSystemStore.Domain.Tables;
 using OnlineSystemStore.Services.ServiceInterface;
 using System.Diagnostics;
-using System.Security.Cryptography;
 
 
 namespace OnlineSystemStore.Services.ServiceImplementation
 {
     public class ProductService : IProductService
     {
-        private readonly IMainRepository<Product> _repository;
-        private readonly IMainRepository<Category> _repositorr;
+        private readonly IMainRepository<Product> _product;
+        private readonly IMainRepository<Category> _category;
         private readonly IMapper _mapp;
 
-        public ProductService(IMainRepository<Product> repository, IMapper mapp , IMainRepository<Category> repositorr)
+        public ProductService(IMainRepository<Product> product, IMapper mapp, IMainRepository<Category> category)
         {
-            _repository = repository;
+            _product = product;
             _mapp = mapp;
-            _repositorr = repositorr;
+            _category = category;
         }
-        public async Task<ResponseDto<ProductDto>> GetProductWithCategoryName()
+
+        public int Max() => _product.Max(x => x.ProductId);
+
+        public async Task<IEnumerable<ProductDto>> GetProductWithCategoryNameAsync()
         {
-            from product in 
+            var proudactData = await _product.GetAllAsync();
+            var categorytData = await _category.GetAllAsync();
+
+            var ProductWithCatName = (
+                from p in proudactData
+                join c in categorytData on p.CategoryRef equals c.CategoryId into cTbl
+                from c in cTbl.DefaultIfEmpty()
+                select new ProductDto
+                {
+                    ProductId = p.ProductId,
+                    ProductName = p.ProductName,
+                    Price = p.Price,
+                    ProductDescription = p.ProductDescription,
+                    CategoryRef = p.CategoryRef,
+                    CategoryName = c?.CategoryName ?? ""
+
+                }).ToList();
+
+            return ProductWithCatName;
         }
-        public int Max() => _repository.Max(x => x.ProductId);
+
 
         public async Task<ResponseDto<IEnumerable<ProductDto>>> GetAllProductAsync()
         {
@@ -35,7 +54,7 @@ namespace OnlineSystemStore.Services.ServiceImplementation
 
             stopwatch.Start();
 
-            var ProductData = await _repository.GetAllAsync();
+            var ProductData = await _product.GetAllAsync();
 
             var ProductDto = _mapp.Map<IEnumerable<ProductDto>>(ProductData);
 
@@ -50,7 +69,7 @@ namespace OnlineSystemStore.Services.ServiceImplementation
 
             stopwatch.Start();
 
-            var ProductData = await _repository.GetByIdAsync(id);
+            var ProductData = await _product.GetByIdAsync(id);
 
             if (ProductData == null)
             {
@@ -87,9 +106,9 @@ namespace OnlineSystemStore.Services.ServiceImplementation
 
                 newProduct.ProductId = Max() + 1;
 
-                await _repository.AddAsync(newProduct);
+                await _product.AddAsync(newProduct);
 
-                bool isSaveing = await _repository.SaveDataAsync();
+                bool isSaveing = await _product.SaveDataAsync();
 
                 stopwatch.Stop();
 
@@ -114,7 +133,7 @@ namespace OnlineSystemStore.Services.ServiceImplementation
 
                 stopwatch.Start();
 
-                var existProduct = await _repository.GetByIdAsync(id);
+                var existProduct = await _product.GetByIdAsync(id);
 
                 if (existProduct == null)
                 {
@@ -129,9 +148,9 @@ namespace OnlineSystemStore.Services.ServiceImplementation
 
                 existProduct.ProductName = model.ProductName;
 
-                _repository.Update(existProduct);
+                _product.Update(existProduct);
 
-                bool isSaveing = await _repository.SaveDataAsync();
+                bool isSaveing = await _product.SaveDataAsync();
 
                 stopwatch.Stop();
 
@@ -153,7 +172,7 @@ namespace OnlineSystemStore.Services.ServiceImplementation
 
                 stopwatch.Start();
 
-                bool isDeleted = await _repository.DeleteAsync(id);
+                bool isDeleted = await _product.DeleteAsync(id);
 
                 stopwatch.Stop();
 

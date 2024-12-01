@@ -14,13 +14,14 @@ namespace OnlineSystemStore.Controllers
         {
             _ProductService = ProductService;
         }
+
+
         [HttpGet("Max")]
         public IActionResult GetProductsMaxNumber()
         {
             int max = _ProductService.Max() + 1;
             return Ok(max);
         }
-
 
         [HttpGet("Get")]
         public async Task<IActionResult> GetAllProducts()
@@ -29,16 +30,19 @@ namespace OnlineSystemStore.Controllers
             return Ok(ProductsData);
         }
 
+
+        [HttpPost("GetDataTable")]
         public async Task<IActionResult> GetProductsDataTalbe(string Search, string CoulmnName, bool isAsending, int skip, int take)
         {
-            var ProductsData = await _ProductService.GetAllProductAsync();
+            var ProductsData = await _ProductService.GetProductWithCategoryNameAsync();
 
-            IQueryable<ProductDto> data = ProductsData.Data.AsQueryable();
+            var data = ProductsData.AsQueryable();
 
             if (!string.IsNullOrEmpty(Search))
             {
                 data = data.Where(x =>
                 x.ProductName.Equals(Search, StringComparison.CurrentCultureIgnoreCase) ||
+                x.Price.ToString().Equals(Search, StringComparison.CurrentCultureIgnoreCase) ||
                 x.ProductId.ToString().Equals(Search, StringComparison.CurrentCultureIgnoreCase));
             }
 
@@ -59,7 +63,7 @@ namespace OnlineSystemStore.Controllers
 
         }
 
-
+        
         [HttpGet("GetByIdAsync/{id}")]
         public async Task<IActionResult> GetProductsByIdAsync(int id)
         {
@@ -72,6 +76,7 @@ namespace OnlineSystemStore.Controllers
 
             return Ok(ProductsData);
         }
+
         [HttpPost("AddAsync")]
         public async Task<IActionResult> AddProductsAsync([FromBody] ProductDto Product)
         {
